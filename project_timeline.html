@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="description" content="Interactive construction timeline for Bucher residence - Dry-in target Nov 1, 2026">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Bucher Build">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%230f172a' width='192' height='192'/><text x='50%' y='50%' font-size='120' font-weight='bold' fill='%23fbbf24' text-anchor='middle' dy='.3em'>📋</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%230f172a' width='192' height='192'/><text x='50%' y='50%' font-size='120' font-weight='bold' fill='%23fbbf24' text-anchor='middle' dy='.3em'>📋</text></svg>">
+    <style>
+        /* Install & Update Prompts */
+        .install-prompt {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .install-prompt.show {
+            display: flex;
+        }
+
+        .install-prompt-text {
+            flex: 1;
+        }
+
+        .install-prompt-text strong {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-size: 1rem;
+        }
+
+        .install-prompt-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .btn-install, .btn-dismiss {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background-color 0.2s;
+        }
+
+        .btn-install {
+            background-color: white;
+            color: #059669;
+        }
+
+        .btn-install:hover {
+            background-color: #f0fdf4;
+        }
+
+        .btn-dismiss {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .btn-dismiss:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .update-prompt {
+            background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .update-prompt.show {
+            display: flex;
+        }
+
+        .update-prompt-text {
+            flex: 1;
+        }
+
+        .update-prompt-text strong {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-size: 1rem;
+        }
+
+        .update-prompt-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .btn-update, .btn-update-later {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background-color 0.2s;
+        }
+
+        .btn-update {
+            background-color: white;
+            color: #f97316;
+        }
+
+        .btn-update:hover {
+            background-color: #fffbeb;
+        }
+
+        .btn-update-later {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .btn-update-later:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 80rem;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.25rem;
+            color: #d1d5db;
+        }
+
+        .status-indicators {
+            margin-top: 1rem;
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.875rem;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-dot {
+            width: 0.75rem;
+            height: 0.75rem;
+            border-radius: 50%;
+        }
+
+        .dot-critical { background-color: #ef4444; }
+        .dot-progress { background-color: #3b82f6; }
+        .dot-complete { background-color: #22c55e; }
+
+        .status-indicator span {
+            color: #e5e7eb;
+            font-weight: 500;
+        }
+
+        /* Counter */
+        .counter-box {
+            background: linear-gradient(to right, #b45309, #ea580c);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            color: white;
+        }
+
+        .counter-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .counter-section {
+            flex: 1;
+        }
+
+        .counter-label {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #fef3c7;
+        }
+
+        .counter-number {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-top: 0.25rem;
+            color: white;
+        }
+
+        .counter-note {
+            font-size: 0.875rem;
+            color: #fef3c7;
+            margin-top: 0.25rem;
+        }
+
+        .counter-right {
+            text-align: right;
+        }
+
+        /* Timeline Phases */
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .phase {
+            border-left: 4px solid #dc2626;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .phase.complete {
+            border-left-color: #22c55e;
+        }
+
+        /* Phase Header */
+        .phase-header {
+            background-color: white;
+            padding: 1.5rem;
+            cursor: pointer;
+            border: 1px solid #e5e7eb;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+
+        .phase-header:hover {
+            background-color: #f9fafb;
+        }
+
+        .phase-header-content {
+            flex: 1;
+        }
+
+        .phase-title-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .phase-icon {
+            font-size: 1.25rem;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .phase-title-text h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .phase-urgency {
+            font-size: 0.875rem;
+            color: #991b1b;
+            font-weight: 700;
+            margin-top: 0.25rem;
+        }
+
+        .phase-dates {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: #374151;
+            margin-top: 0.5rem;
+        }
+
+        .phase-dates span {
+            font-weight: 600;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 0.5rem;
+            background-color: #d1d5db;
+            border-radius: 9999px;
+            overflow: hidden;
+            margin-top: 0.75rem;
+        }
+
+        .progress-bar {
+            height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 9999px;
+        }
+
+        .progress-phase-1 { background: linear-gradient(to right, #dc2626, #f87171); }
+        .progress-phase-2 { background: linear-gradient(to right, #ea580c, #fb923c); }
+        .progress-phase-3 { background: linear-gradient(to right, #d97706, #fbbf24); }
+        .progress-phase-4 { background: linear-gradient(to right, #16a34a, #86efac); }
+        .progress-phase-5 { background: linear-gradient(to right, #2563eb, #60a5fa); }
+        .progress-phase-6 { background: linear-gradient(to right, #7c3aed, #a78bfa); }
+
+        .chevron-icon {
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+            color: #6b7280;
+            font-weight: 700;
+        }
+
+        .phase.expanded .chevron-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Phase Details */
+        .phase-details {
+            background-color: #f9fafb;
+            padding: 1.5rem;
+            border-top: 1px solid #d1d5db;
+            display: none;
+        }
+
+        .phase.expanded .phase-details {
+            display: block;
+        }
+
+        .details-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .details-section h4 {
+            font-weight: 900;
+            color: #000000;
+            margin-bottom: 0.75rem;
+            font-size: 1.05rem;
+            letter-spacing: 0.5px;
+        }
+
+        .milestone-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .milestone-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            font-size: 0.875rem;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+        }
+
+        .milestone-item.critical {
+            background-color: rgba(254, 226, 226, 0.8);
+            color: #7f1d1d;
+            font-weight: 500;
+        }
+
+        .milestone-item.complete {
+            background-color: rgba(220, 252, 231, 0.8);
+            color: #15803d;
+            font-weight: 500;
+        }
+
+        .milestone-item.pending {
+            background-color: rgba(219, 234, 254, 0.8);
+            color: #1e40af;
+            font-weight: 500;
+        }
+
+        .milestone-date {
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            margin-top: 2px;
+            flex-shrink: 0;
+            font-weight: 600;
+        }
+
+        .milestone-text {
+            flex: 1;
+        }
+
+        .milestone-badge {
+            margin-left: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .details-box {
+            background-color: #ffffff;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            border: 2px solid #d1d5db;
+        }
+
+        .details-box p {
+            color: #000000;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .details-box strong {
+            font-weight: 900;
+            color: #000000;
+        }
+
+        .details-box a {
+            color: #0052cc;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .gap-list {
+            list-style: none;
+        }
+
+        .gap-list li {
+            display: flex;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #000000;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .gap-bullet {
+            color: #d97706;
+            font-weight: 900;
+            flex-shrink: 0;
+            font-size: 1rem;
+        }
+
+        /* Summary Footer */
+        .summary-footer {
+            margin-top: 2rem;
+            background-color: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            color: white;
+        }
+
+        .summary-footer h3 {
+            font-size: 1.125rem;
+            font-weight: 900;
+            margin-bottom: 0.75rem;
+            color: #fef3c7;
+        }
+
+        .summary-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .summary-list li {
+            display: flex;
+            gap: 0.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .summary-number {
+            color: #fbbf24;
+            font-weight: 900;
+            flex-shrink: 0;
+            width: auto;
+            margin-right: 0.5rem;
+        }
+
+        .summary-list span {
+            color: #f3f4f6;
+        }
+
+        /* Footer */
+        .page-footer {
+            margin-top: 1rem;
+            text-align: center;
+            color: #d1d5db;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Export Button */
+        .export-button {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background-color 0.2s;
+            margin-bottom: 1rem;
+        }
+
+        .export-button:hover {
+            background-color: #3367d6;
+        }
+
+        .export-button:active {
+            background-color: #2a52be;
+        }
+
+        .export-info {
+            background-color: #e3f2fd;
+            border-left: 4px solid #4285f4;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            color: #1565c0;
+        }
+
+        .export-info strong {
+            color: #0d47a1;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0;
+            }
+
+            .header h1 {
+                font-size: 1.875rem;
+            }
+
+            .counter-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .counter-right {
+                text-align: left;
+            }
+
+            .phase-header {
+                flex-direction: column;
+            }
+
+            .status-indicators {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Install Prompt -->
+        <div id="install-prompt" class="install-prompt">
+            <div class="install-prompt-text">
+                <strong>📱 Install App</strong>
+                <div>Add Bucher Timeline to your home screen for quick access</div>
+            </div>
+            <div class="install-prompt-buttons">
+                <button class="btn-install" onclick="installApp()">Install</button>
+                <button class="btn-dismiss" onclick="dismissInstall()">Later</button>
+            </div>
+        </div>
+
+        <!-- Update Prompt -->
+        <div id="update-prompt" class="update-prompt">
+            <div class="update-prompt-text">
+                <strong>📦 Update Available</strong>
+                <div>New features and improvements are ready</div>
+            </div>
+            <div class="update-prompt-buttons">
+                <button class="btn-update" onclick="updateApp()">Update Now</button>
+                <button class="btn-update-later" onclick="dismissUpdate()">Later</button>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <div class="header">
+            <h1>Bucher Residence</h1>
+            <p>Construction Timeline: Dry-In by November 1, 2026</p>
+            <div class="status-indicators">
+                <div class="status-indicator">
+                    <div class="status-dot dot-critical"></div>
+                    <span>Critical Path (No Delays)</span>
+                </div>
+                <div class="status-indicator">
+                    <div class="status-dot dot-progress"></div>
+                    <span>In Progress</span>
+                </div>
+                <div class="status-indicator">
+                    <div class="status-dot dot-complete"></div>
+                    <span>Complete</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Section -->
+        <div class="export-info">
+            <strong>📋 Export to Google Tasks:</strong> Click the button below to export all milestones and critical success factors to your Google Tasks list. You'll need to be signed into your Google account.
+        </div>
+        <button class="export-button" onclick="exportToGoogleTasks()">📤 Export to Google Tasks</button>
+
+        <!-- Counter -->
+        <div class="counter-box">
+            <div class="counter-content">
+                <div class="counter-section">
+                    <div class="counter-label">Days Until Dry-In</div>
+                    <div class="counter-number" id="days-remaining">141</div>
+                    <div class="counter-note">From today (June 13, 2026) to November 1, 2026</div>
+                </div>
+                <div class="counter-section counter-right">
+                    <div class="counter-label">Timeline Density</div>
+                    <div class="counter-number">6</div>
+                    <div class="counter-note">Phases</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="timeline" id="timeline-container"></div>
+
+        <!-- Summary Footer -->
+        <div class="summary-footer">
+            <h3>Critical Success Factors</h3>
+            <ul class="summary-list">
+                <li>
+                    <span class="summary-number">1.</span>
+                    <span><strong>Order Enertech WV060 by June 15</strong> (8–16 week lead time is your constraint)</span>
+                </li>
+                <li>
+                    <span class="summary-number">2.</span>
+                    <span><strong>NR 812 permit by July 1</strong> (geothermal discharge; don't delay)</span>
+                </li>
+                <li>
+                    <span class="summary-number">3.</span>
+                    <span><strong>Finalize Virginia's Wing manifold location by July 31</strong> (before framing)</span>
+                </li>
+                <li>
+                    <span class="summary-number">4.</span>
+                    <span><strong>All permits by July 15</strong> (permits → permits delays ripple through entire schedule)</span>
+                </li>
+                <li>
+                    <span class="summary-number">5.</span>
+                    <span><strong>Footing pour by Aug 14</strong> (any slip cascades to dry-in)</span>
+                </li>
+                <li>
+                    <span class="summary-number">6.</span>
+                    <span><strong>Slab pour by Sep 15</strong> (all radiant circuits pressure-tested first)</span>
+                </li>
+                <li>
+                    <span class="summary-number">7.</span>
+                    <span><strong>Post-framing inspection by Oct 13</strong> (no delays in roof assembly)</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="page-footer">
+            <p>Prepared: June 13, 2026 | Lot 21, Hidden Prairie Drive, Holmen, WI 54636</p>
+        </div>
+    </div>
+
+    <script>
+        const phaseData = [
+            {
+                id: 1,
+                name: 'PRE-GROUNDBREAK',
+                startDate: '2026-06-13',
+                endDate: '2026-07-31',
+                days: 48,
+                status: 'in-progress',
+                urgency: 'URGENT: Order Enertech WV060',
+                gradient: 'progress-phase-1',
+                milestones: [
+                    { date: '2026-06-15', task: 'Order Enertech WV060', status: 'pending', critical: true },
+                    { date: '2026-06-20', task: 'Construction Loan Pre-Approval', status: 'pending' },
+                    { date: '2026-06-25', task: 'NR 812 Discharge Permit (La Crosse County)', status: 'pending' },
+                    { date: '2026-06-28', task: 'AEC Committee Covenant Submission', status: 'pending' },
+                    { date: '2026-07-15', task: 'All Permits Approved', status: 'pending', critical: true },
+                    { date: '2026-07-20', task: 'Well Drilling Coordination (Kouba)', status: 'pending' },
+                    { date: '2026-07-25', task: 'Construction Loan Closing', status: 'pending', critical: true },
+                    { date: '2026-07-25', task: 'Builders Risk Insurance Activated', status: 'pending' },
+                    { date: '2026-07-31', task: 'Site Mobilization Complete', status: 'pending' },
+                ],
+                details: {
+                    summary: 'Foundation work: permits, financing, site access, material procurement',
+                    binderReference: '#10 Pre-Construction Checklist, #8 Budgeting, #9 Permit',
+                    gaps: [
+                        'NR 812 permit (geothermal discharge) not in binder—START EARLY',
+                        'Enertech WV060 has 8–16 week lead time (most critical component)',
+                        'Green certification enrollment (DOE ZERH/Phius CORE) not in binder—enroll by July 1',
+                        'Radiant manifold location finalization (Virginia\'s Wing) must happen before July 31',
+                    ]
+                }
+            },
+            {
+                id: 2,
+                name: 'SITE PREP & FOOTINGS',
+                startDate: '2026-08-01',
+                endDate: '2026-08-25',
+                days: 25,
+                status: 'pending',
+                urgency: 'Geotech compaction before footing pour',
+                gradient: 'progress-phase-2',
+                milestones: [
+                    { date: '2026-08-05', task: 'Excavation Complete', status: 'pending' },
+                    { date: '2026-08-05', task: 'Geotechnical Compaction Inspections', status: 'pending' },
+                    { date: '2026-08-10', task: 'Footing Trenches Dug & Verified', status: 'pending' },
+                    { date: '2026-08-12', task: 'Footing Rebar & Ufer Ground Installed', status: 'pending' },
+                    { date: '2026-08-13', task: 'Building Inspector: Footing Inspection', status: 'pending' },
+                    { date: '2026-08-14', task: 'Footing Pour (ICF base)', status: 'pending', critical: true },
+                    { date: '2026-08-15', task: 'Well Drilling & Testing (Kouba)', status: 'pending', critical: true },
+                    { date: '2026-08-18', task: 'Septic Tank Installation', status: 'pending' },
+                ],
+                details: {
+                    summary: 'Excavation, footing, well drilling, septic installation',
+                    binderReference: '#11 Site Prep & Logistics, #13 Footings Checklist, #2 Most Common Inspections',
+                    gaps: [
+                        'Geothermal loop trenching not detailed (coordinates with well drilling)',
+                        'Ufer ground (3\' conduit for power + sprinkler + water stubs) critical—coordinate with electrician',
+                        'No mention of hydraulic load verification for ICF base placement',
+                        'Footing elevation survey important for slab level control',
+                    ]
+                }
+            },
+            {
+                id: 3,
+                name: 'UNDERGROUND & PREP',
+                startDate: '2026-08-25',
+                endDate: '2026-09-05',
+                days: 11,
+                status: 'pending',
+                urgency: '5 critical pre-slab items',
+                gradient: 'progress-phase-3',
+                milestones: [
+                    { date: '2026-08-25', task: 'Underground Plumbing Rough-In (below slab)', status: 'pending' },
+                    { date: '2026-08-28', task: 'Underground Electrical Conduit & Sleeving', status: 'pending' },
+                    { date: '2026-08-29', task: 'Geothermal Ground Loop Prep', status: 'pending' },
+                    { date: '2026-08-30', task: 'Solar/PV Conduit Sleeves for Roof', status: 'pending' },
+                    { date: '2026-09-01', task: 'Radiant Floor Circuit Manifold Installed', status: 'pending', critical: true },
+                    { date: '2026-09-01', task: 'In-Slab Floor Drains (2 locations)', status: 'pending' },
+                    { date: '2026-09-02', task: 'Building Inspector: Underground Inspection', status: 'pending', critical: true },
+                    { date: '2026-09-03', task: 'Stem Wall/Foundation Forming', status: 'pending' },
+                ],
+                details: {
+                    summary: 'Underground utilities, geothermal loop, radiant circuit final placement, pre-slab inspection',
+                    binderReference: '#14 Underground Rough Plumbing, #5 Electrical Checklist, #15 Foundation',
+                    gaps: [
+                        'CRITICAL: Manifold location for Virginia\'s Wing (west side) must be finalized—impacts wall layout',
+                        'All 45 radiant circuits MUST pressure-test at 60 psi for 30 min before slab pour (not in binder)',
+                        'Geothermal discharge line routing to county-approved location (NR 812)',
+                        'Buffer tank pad elevation & rough-in drain critical (flagged upgrade)',
+                        'EV charger conduit stubs to all 3 garage bays before concrete',
+                        'Floor drain sizing for future radiant system maintenance (important detail)',
+                    ]
+                }
+            },
+            {
+                id: 4,
+                name: 'FOUNDATION & SLAB',
+                startDate: '2026-09-05',
+                endDate: '2026-09-20',
+                days: 15,
+                status: 'pending',
+                urgency: 'Slab inspection & weather window',
+                gradient: 'progress-phase-4',
+                milestones: [
+                    { date: '2026-09-05', task: 'Stem Wall Rebar & ICF Placement', status: 'pending' },
+                    { date: '2026-09-09', task: 'Building Inspector: Foundation Rebar Inspection', status: 'pending' },
+                    { date: '2026-09-10', task: 'Vapor Barrier Over Slab Area', status: 'pending' },
+                    { date: '2026-09-10', task: 'Radiant Tubing & Sensor Installation (Final)', status: 'pending' },
+                    { date: '2026-09-12', task: 'Electrical Sub-Panel Rough Box Location (400A)', status: 'pending' },
+                    { date: '2026-09-13', task: 'EV Charging Conduit to Garage Bays', status: 'pending' },
+                    { date: '2026-09-13', task: 'EMT Conduit Stubs for Future Equipment', status: 'pending' },
+                    { date: '2026-09-14', task: 'Slab & ICF Pour (with Radiant Final Check)', status: 'pending', critical: true },
+                    { date: '2026-09-16', task: 'Building Inspector: Foundation Inspection Pre-Backfill', status: 'pending' },
+                    { date: '2026-09-18', task: 'Compacted Backfill & Grade Slope Verification', status: 'pending' },
+                ],
+                details: {
+                    summary: 'Foundation stem walls, radiant circuit final prep, slab pour with geothermal/electrical integration',
+                    binderReference: '#15 Foundation Checklist, #2 Most Common Inspections',
+                    gaps: [
+                        'Your HVICF system requires Hobbs structural draw on-site for inspector validation',
+                        'Radiant sensor placement must be photo-documented before slab pour',
+                        'Virginia\'s Wing manifold final location lock (critical structural planning)',
+                        'Hydronic expansion tank pad location & connection points',
+                        'No mention of sub-slab EPS R-20+ insulation placement verification',
+                        'Blower door pre-drywall test strategy should be planned (ICF benefit: early testing)',
+                    ]
+                }
+            },
+            {
+                id: 5,
+                name: 'FRAMING',
+                startDate: '2026-09-21',
+                endDate: '2026-10-20',
+                days: 30,
+                status: 'pending',
+                urgency: 'Roof ready by Oct 20 for dry-in push',
+                gradient: 'progress-phase-5',
+                milestones: [
+                    { date: '2026-09-21', task: 'ICF Wall Framing & Bracing', status: 'pending' },
+                    { date: '2026-09-25', task: 'Sub-Floor/Floor System Installation', status: 'pending' },
+                    { date: '2026-09-28', task: 'Wall Framing Proceeding (1st Level)', status: 'pending' },
+                    { date: '2026-10-01', task: 'Window/Door Bucks Rough Opening Prep', status: 'pending' },
+                    { date: '2026-10-04', task: 'Building Inspector: Framing Inspection (Pre-Roof)', status: 'pending' },
+                    { date: '2026-10-05', task: 'Roof Truss Installation', status: 'pending' },
+                    { date: '2026-10-09', task: 'Roof Sheathing Installation', status: 'pending' },
+                    { date: '2026-10-13', task: 'Building Inspector: Post-Framing Inspection', status: 'pending', critical: true },
+                    { date: '2026-10-14', task: 'Thermal/Humidity Insulation Prep', status: 'pending' },
+                ],
+                details: {
+                    summary: 'ICF walls, roof trusses, sheathing; electrical, plumbing, HVAC rough-in coordination',
+                    binderReference: '#17 Framing Checklist (multiple sections), #2 Most Common Inspections',
+                    gaps: [
+                        'HVAC ductwork routing for ERV supply/return (Zehnder ComfoAir Q350) not in binder—must coordinate early',
+                        'Electrical rough-in (400A main + 2× EV chargers) timing critical for Oct inspection',
+                        'Radiant floor circuit integrity check under framing load (no kinks, pressure holds)',
+                        'Virginia\'s Wing kneelwall radiant circuit access finalization',
+                        'Roof mounting points for solar PV array (10 kW system) marked on truss plan',
+                        'Air sealing strategy documentation (foam at top/bottom plates, penetrations)',
+                        'Blower door pre-drywall option should be considered for ICF (early feedback on envelope)',
+                    ]
+                }
+            },
+            {
+                id: 6,
+                name: 'DRY-IN (FINAL PUSH)',
+                startDate: '2026-10-20',
+                endDate: '2026-11-01',
+                days: 12,
+                status: 'pending',
+                urgency: 'GOAL: Weather-tight by Nov 1',
+                gradient: 'progress-phase-6',
+                milestones: [
+                    { date: '2026-10-20', task: 'Roof Covering Installation (EuroShield rubber)', status: 'pending' },
+                    { date: '2026-10-26', task: 'Standing Seam Metal (shed/porch)', status: 'pending' },
+                    { date: '2026-10-26', task: 'Windows & Doors Installed & Sealed', status: 'pending', critical: true },
+                    { date: '2026-10-29', task: 'Building Inspector: Roof Inspection', status: 'pending' },
+                    { date: '2026-10-30', task: 'Gutter & Downspout Installation', status: 'pending' },
+                    { date: '2026-10-31', task: 'Final Grade Slope Verification (5% @ 10\')', status: 'pending' },
+                    { date: '2026-11-01', task: 'DRY-IN COMPLETE ✓', status: 'pending', critical: true },
+                ],
+                details: {
+                    summary: 'Roof covering, windows/doors, gutters; final inspection; weather-tight envelope achieved',
+                    binderReference: '#18 Roof Dry-In Checklist, #37 Soffit/Fascia/Gutters',
+                    gaps: [
+                        'Air sealing verification (blower door test pre or post drywall—target ≤0.30 ACH50)',
+                        'South-facing window SHGC optimization swap recommended (passive solar benefit)',
+                        'ERV intake/exhaust penetrations sealed properly (no air leaks around ducts)',
+                        'Geothermal loop final commissioning prep (dissolved oxygen, antifreeze, pressure)',
+                        'Electrical rough-in 100% complete with all circuits labeled',
+                        'Radiant system pressure-hold verification (no slow leaks from framing punctures)',
+                        'Post-dry-in: Blower door test, ERV ductwork smoke test (if doing pre-drywall approach)',
+                    ]
+                }
+            }
+        ];
+
+        // Export to Google Tasks
+        function exportToGoogleTasks() {
+            // Collect all critical milestones and success factors
+            let tasks = [];
+            
+            // Add critical success factors
+            const criticalFactors = [
+                "Order Enertech WV060 by June 15 (8–16 week lead time)",
+                "NR 812 permit by July 1 (geothermal discharge)",
+                "Finalize Virginia's Wing manifold location by July 31",
+                "All permits by July 15",
+                "Footing pour by Aug 14",
+                "Slab pour by Sep 15 (all radiant circuits pressure-tested)",
+                "Post-framing inspection by Oct 13",
+                "DRY-IN COMPLETE by Nov 1"
+            ];
+            
+            // Add critical milestones from each phase
+            phaseData.forEach(phase => {
+                phase.milestones.forEach(milestone => {
+                    if (milestone.critical) {
+                        tasks.push(`[${phase.name}] ${milestone.task} - ${milestone.date}`);
+                    }
+                });
+            });
+
+            // Generate formatted text for copying
+            let taskText = "BUCHER RESIDENCE - CONSTRUCTION TIMELINE\n";
+            taskText += "Goal: Dry-In by November 1, 2026\n\n";
+            taskText += "CRITICAL SUCCESS FACTORS:\n";
+            criticalFactors.forEach((factor, index) => {
+                taskText += `${index + 1}. ${factor}\n`;
+            });
+            taskText += "\nCRITICAL MILESTONES:\n";
+            tasks.forEach((task, index) => {
+                taskText += `${index + 1}. ${task}\n`;
+            });
+
+            // Create a temporary textarea to copy from
+            const textarea = document.createElement('textarea');
+            textarea.value = taskText;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            // Show confirmation and instructions
+            alert(
+                "✅ Tasks copied to clipboard!\n\n" +
+                "INSTRUCTIONS:\n" +
+                "1. Go to Google Tasks (tasks.google.com)\n" +
+                "2. Click 'Add a task' in a list (or create new list 'Bucher Build')\n" +
+                "3. Paste the copied text\n" +
+                "4. Google Tasks will auto-format items\n\n" +
+                "NOTE: For best results, add tasks one at a time:\n" +
+                "- Create a task with the title\n" +
+                "- Add the due date in the task details\n" +
+                "- Mark critical items with a star (★)\n\n" +
+                "The complete list is now in your clipboard!"
+            );
+
+            // Optional: Open Google Tasks in a new tab
+            setTimeout(() => {
+                window.open('https://tasks.google.com/tasks/my_tasks', '_blank');
+            }, 1000);
+        }
+
+        // Calculate days remaining
+        function calculateDaysRemaining() {
+            const today = new Date(2026, 5, 13);
+            const dryIn = new Date(2026, 10, 1);
+            const days = Math.floor((dryIn - today) / (1000 * 60 * 60 * 24));
+            return days;
+        }
+
+        // Calculate progress percentage
+        function getProgressPercentage(startStr, endStr) {
+            const today = new Date(2026, 5, 13);
+            const start = new Date(startStr);
+            const end = new Date(endStr);
+            const total = end - start;
+            const elapsed = today - start;
+            const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
+            return pct;
+        }
+
+        // Get status icon
+        function getStatusIcon(status) {
+            if (status === 'complete') return '✓';
+            if (status === 'in-progress') return '⏱';
+            return '⚠';
+        }
+
+        // Render timeline
+        function renderTimeline() {
+            const container = document.getElementById('timeline-container');
+            container.innerHTML = phaseData.map(phase => {
+                const progress = getProgressPercentage(phase.startDate, phase.endDate);
+                const statusIcon = getStatusIcon(phase.status);
+                
+                return `
+                    <div class="phase ${phase.status === 'in-progress' ? 'expanded' : ''}" data-phase-id="${phase.id}">
+                        <div class="phase-header" onclick="togglePhase(${phase.id})">
+                            <div class="phase-header-content">
+                                <div class="phase-title-row">
+                                    <span class="phase-icon">${statusIcon}</span>
+                                    <div class="phase-title-text">
+                                        <h3>Phase ${phase.id}: ${phase.name}</h3>
+                                        <div class="phase-urgency">${phase.urgency}</div>
+                                    </div>
+                                </div>
+                                <div class="phase-dates">
+                                    <span>${phase.startDate} → ${phase.endDate}</span>
+                                    <span>${phase.days} days</span>
+                                </div>
+                                <div class="progress-container">
+                                    <div class="progress-bar ${phase.gradient}" style="width: ${progress}%"></div>
+                                </div>
+                            </div>
+                            <span class="chevron-icon">▼</span>
+                        </div>
+
+                        <div class="phase-details">
+                            <div class="details-section">
+                                <h4>Critical Milestones</h4>
+                                <div class="milestone-list">
+                                    ${phase.milestones.map((m, idx) => {
+                                        let statusClass = 'pending';
+                                        if (m.status === 'complete') statusClass = 'complete';
+                                        if (m.critical) statusClass = 'critical';
+                                        
+                                        return `
+                                            <div class="milestone-item ${statusClass}">
+                                                <span class="milestone-date">${m.date}</span>
+                                                <span class="milestone-text">${m.task}</span>
+                                                ${m.critical ? '<span class="milestone-badge">⚠</span>' : ''}
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+
+                            <div class="details-box">
+                                <p><strong>Summary:</strong> ${phase.details.summary}</p>
+                                <p><strong>Binder Reference:</strong> ${phase.details.binderReference}</p>
+                            </div>
+
+                            <div class="details-section">
+                                <h4>⚠️ Gaps (Not in Standard Binder)</h4>
+                                <ul class="gap-list">
+                                    ${phase.details.gaps.map(gap => `
+                                        <li>
+                                            <span class="gap-bullet">•</span>
+                                            <span>${gap}</span>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Toggle phase expansion
+        function togglePhase(phaseId) {
+            const phaseElement = document.querySelector(`[data-phase-id="${phaseId}"]`);
+            phaseElement.classList.toggle('expanded');
+        }
+
+        // ===== PWA FUNCTIONALITY =====
+        let deferredPrompt;
+        let refreshing = false;
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js').then(registration => {
+                    console.log('Service Worker registered:', registration);
+
+                    // Check for updates periodically
+                    setInterval(() => {
+                        registration.update();
+                    }, 60000); // Check every minute
+
+                    // Listen for updates
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'activated' && navigator.serviceWorker.controller) {
+                                showUpdatePrompt();
+                            }
+                        });
+                    });
+                }).catch(error => {
+                    console.log('Service Worker registration failed:', error);
+                });
+            });
+
+            // Listen for controller change (update applied)
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (refreshing) return;
+                refreshing = true;
+                window.location.reload();
+            });
+        }
+
+        // Handle install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            showInstallPrompt();
+        });
+
+        window.addEventListener('appinstalled', () => {
+            console.log('App installed!');
+            hideInstallPrompt();
+            deferredPrompt = null;
+        });
+
+        // Show install prompt
+        function showInstallPrompt() {
+            const prompt = document.getElementById('install-prompt');
+            if (prompt) {
+                prompt.classList.add('show');
+            }
+        }
+
+        // Hide install prompt
+        function hideInstallPrompt() {
+            const prompt = document.getElementById('install-prompt');
+            if (prompt) {
+                prompt.classList.remove('show');
+            }
+        }
+
+        // Dismiss install prompt
+        function dismissInstall() {
+            hideInstallPrompt();
+            deferredPrompt = null;
+        }
+
+        // Install app
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(choiceResult => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User installed the app');
+                    } else {
+                        console.log('User dismissed the install prompt');
+                    }
+                    deferredPrompt = null;
+                    hideInstallPrompt();
+                });
+            }
+        }
+
+        // Show update prompt
+        function showUpdatePrompt() {
+            const prompt = document.getElementById('update-prompt');
+            if (prompt) {
+                prompt.classList.add('show');
+            }
+        }
+
+        // Dismiss update prompt
+        function dismissUpdate() {
+            const prompt = document.getElementById('update-prompt');
+            if (prompt) {
+                prompt.classList.remove('show');
+            }
+        }
+
+        // Update app
+        function updateApp() {
+            if (navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+            }
+        }
+
+        // Request notification permission
+        function requestNotificationPermission() {
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        console.log('Notification permission granted');
+                        // Send a test notification
+                        new Notification('Bucher Build Timeline', {
+                            body: 'Notifications enabled! You\'ll get alerts for critical dates.',
+                            icon: '/icon-192x192.png',
+                            badge: '/badge-72x72.png'
+                        });
+                    }
+                });
+            }
+        }
+
+        // Request notification permission on load
+        window.addEventListener('load', () => {
+            requestNotificationPermission();
+        });
+
+        // Update days remaining
+        document.getElementById('days-remaining').textContent = calculateDaysRemaining();
+
+        // Initial render
+        renderTimeline();
+    </script>
+</body>
+</html>

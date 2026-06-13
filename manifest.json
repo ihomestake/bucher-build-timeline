@@ -1,0 +1,43 @@
+{
+  "name": "Bucher Residence Construction Timeline",
+  "short_name": "Bucher Build",
+  "description": "Interactive construction project timeline for Lot 21, Hidden Prairie Drive, Holmen WI - Dry-in target Nov 1, 2026",
+  "version": "1.0.0",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%230f172a' width='192' height='192'/><text x='50%' y='50%' font-size='120' font-weight='bold' fill='%23fbbf24' text-anchor='middle' dy='.3em'>📋</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%230f172a' width='512' height='512'/><text x='50%' y='50%' font-size='320' font-weight='bold' fill='%23fbbf24' text-anchor='middle' dy='.3em'>📋</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23fbbf24' width='192' height='192'/><text x='50%' y='50%' font-size='120' font-weight='bold' fill='%230f172a' text-anchor='middle' dy='.3em'>📋</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><rect fill='%230f172a' width='540' height='720'/><text x='50%' y='50' font-size='40' font-weight='bold' fill='white' text-anchor='middle'>Bucher Timeline</text></svg>",
+      "sizes": "540x720",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
+    }
+  ],
+  "categories": ["productivity", "business"],
+  "screenshots_lang": "en-US",
+  "prefer_related_applications": false
+}
